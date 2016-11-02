@@ -1,0 +1,23 @@
+PidFile=/var/run/zabbix/zabbix_agentd.pid
+LogFile=/var/log/zabbix-agent/zabbix_agentd.log
+LogFileSize=10
+EnableRemoteCommands=0
+LogRemoteCommands=1
+
+{% if monitoring_zabbix_passive_enabled is defined and monitoring_zabbix_passive_enabled == true %}
+# passive monitoring
+# from zabbix-server perspective: "polling"
+Server={{ monitoring_zabbix_host }},::1
+{% else %}
+StartAgents=0
+{% endif %}
+
+{% if monitoring_zabbix_active_enabled is defined and monitoring_zabbix_active_enabled == true %}
+# active monitoring
+# from zabbix-server perspective: "pushing"
+ServerActive={{ monitoring_zabbix_host }}
+{% endif %}
+
+HostMetadataItem=system.uname
+
+Include=/etc/zabbix/zabbix_agentd.d/

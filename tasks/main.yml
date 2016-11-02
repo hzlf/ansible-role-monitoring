@@ -1,0 +1,9 @@
+---
+
+- include: rsyslog.yml
+  tags: monitoring,rsyslog
+  become: yes
+
+- include: zabbix-agent.yml
+  tags: monitoring,zabbix
+  become: yes

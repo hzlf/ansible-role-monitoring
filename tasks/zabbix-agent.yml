@@ -1,0 +1,42 @@
+---
+
+
+- name: add zabbix repository key
+  apt_key: url=https://repo.zabbix.com/zabbix-official-repo.key state=present
+
+- name: add zabbix repository
+  apt_repository: repo='deb http://repo.zabbix.com/zabbix/3.0/debian jessie main' state=present
+
+- name: add zabbix src repository
+  apt_repository: repo='deb-src http://repo.zabbix.com/zabbix/3.0/debian jessie main' state=present
+
+- name: installing zabbix-agent
+  apt: name=zabbix-agent state=latest
+
+
+
+- name: make sure zabbix log directory exists
+  file:
+    path: /var/log/zabbix-agent/
+    owner: zabbix
+    group: zabbix
+    mode: 0755
+    state: directory
+
+- name: adding level reader
+  template: src=files/level-reader.py
+            dest=/usr/local/bin/level-reader.py
+            owner=root
+            group=root
+            mode=0755
+
+- name: adding zabbix config
+  template: src=zabbix_agentd.conf.j2
+            dest=/etc/zabbix/zabbix_agentd.conf
+            owner=root
+            group=root
+            mode=0644
+
+- name: Restart zabbix-agent
+  service: name=zabbix-agent state=restarted
+  changed_when: False

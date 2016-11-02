@@ -1,0 +1,9 @@
+---
+monitoring_syslog_host: gojo.hazelfire.com
+monitoring_syslog_port: 10514
+
+monitoring_zabbix_host: service.hazelfire.com
+
+monitoring_zabbix_active_enabled: true
+monitoring_zabbix_passive_enabled: true
+
