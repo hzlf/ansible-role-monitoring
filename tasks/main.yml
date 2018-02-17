@@ -3,7 +3,9 @@
 - include: rsyslog.yml
   tags: monitoring,rsyslog
   become: yes
+  when: monitoring_syslog_enabled
 
 - include: zabbix-agent.yml
   tags: monitoring,zabbix
   become: yes
+  when: (monitoring_zabbix_active_enabled or monitoring_zabbix_passive_enabled)

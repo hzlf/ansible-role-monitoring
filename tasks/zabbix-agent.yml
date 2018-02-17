@@ -1,19 +1,39 @@
 ---
 
 
-- name: add zabbix repository key
+- name: add zabbix repository key (debian 7 & 8)
   apt_key: url=https://repo.zabbix.com/zabbix-official-repo.key state=present
+  when: ansible_distribution == 'Debian' and (ansible_distribution_version == '7' or ansible_distribution_version == '8')
 
-- name: add zabbix repository
-  apt_repository: repo='deb http://repo.zabbix.com/zabbix/3.0/debian jessie main' state=present
+- name: add zabbix repository (debian 7 & 8)
+  apt_repository: repo='deb http://repo.zabbix.com/zabbix/3.0/debian {{ ansible_distribution_release }} main' state=present
+  when: ansible_distribution == 'Debian' and (ansible_distribution_version == '7' or ansible_distribution_version == '8')
 
-- name: add zabbix src repository
-  apt_repository: repo='deb-src http://repo.zabbix.com/zabbix/3.0/debian jessie main' state=present
+- name: add zabbix src repository (debian 7 & 8)
+  apt_repository: repo='deb-src http://repo.zabbix.com/zabbix/3.0/debian {{ ansible_distribution_release }} main' state=present
+  when: ansible_distribution == 'Debian' and (ansible_distribution_version == '7' or ansible_distribution_version == '8')
+
+
+
+- name: add zabbix repository key (ubuntu)
+  apt_key: url=https://repo.zabbix.com/zabbix-official-repo.key state=present
+  when: ansible_distribution == 'Ubuntu'
+
+- name: add zabbix repository (ubuntu)
+  apt_repository: repo='deb http://repo.zabbix.com/zabbix/3.0/ubuntu {{ ansible_distribution_release }} main' state=present
+  when: ansible_distribution == 'Ubuntu'
+
+- name: add zabbix src repository (ubuntu)
+  apt_repository: repo='deb-src http://repo.zabbix.com/zabbix/3.0/ubuntu {{ ansible_distribution_release }} main' state=present
+  when: ansible_distribution == 'Ubuntu'
+
+
+
+- name: update apt cache
+  apt: update_cache=yes cache_valid_time=3600
 
 - name: installing zabbix-agent
   apt: name=zabbix-agent state=latest
-
-
 
 - name: make sure zabbix log directory exists
   file:
@@ -23,12 +43,10 @@
     mode: 0755
     state: directory
 
-- name: adding level reader
-  template: src=files/level-reader.py
-            dest=/usr/local/bin/level-reader.py
-            owner=root
-            group=root
-            mode=0755
+- name: make sure zabbix conf directory exists
+  file:
+    path: /etc/zabbix/zabbix_agentd.conf.d/
+    state: directory
 
 - name: adding zabbix config
   template: src=zabbix_agentd.conf.j2
@@ -37,6 +55,6 @@
             group=root
             mode=0644
 
-- name: Restart zabbix-agent
+- name: restart zabbix-agent
   service: name=zabbix-agent state=restarted
   changed_when: False

@@ -7,7 +7,7 @@ LogRemoteCommands=1
 {% if monitoring_zabbix_passive_enabled is defined and monitoring_zabbix_passive_enabled == true %}
 # passive monitoring
 # from zabbix-server perspective: "polling"
-Server={{ monitoring_zabbix_host }},::1
+Server={{ monitoring_zabbix_host }}{% if monitoring_zabbix_passive_source_ip %},{{ monitoring_zabbix_passive_source_ip }}{% endif %},::1
 {% else %}
 StartAgents=0
 {% endif %}
@@ -20,4 +20,4 @@ ServerActive={{ monitoring_zabbix_host }}
 
 HostMetadataItem=system.uname
 
-Include=/etc/zabbix/zabbix_agentd.d/
+Include=/etc/zabbix/zabbix_agentd.conf.d/
