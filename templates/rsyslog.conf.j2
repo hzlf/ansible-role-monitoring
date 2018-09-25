@@ -1,5 +1,13 @@
 #  /etc/rsyslog.conf - installed via ansible
 
+{% if monitoring_hostname_from_inventory %}
+$LocalHostName {{ inventory_hostname }}{% if monitoring_hostname_appendix %}{{ monitoring_hostname_appendix }}{% endif %}
+{% else %}
+$PreserveFQDN on
+{% endif %}
+
+
+
 #################
 #### MODULES ####
 #################
@@ -56,7 +64,6 @@ daemon.*;mail.*;\
 	*.=debug;*.=info;\
 	*.=notice;*.=warn	|/dev/xconsole
 
-$PreserveFQDN on
 
-$template GRAYLOGRFC5424,"<%PRI%>%PROTOCOL-VERSION% %TIMESTAMP:::date-rfc3339% %HOSTNAME% %APP-NAME% %PROCID% %MSGID% %STRUCTURED-DATA% %msg%\n"
-*.* @{{ monitoring_syslog_host }}:{{ monitoring_syslog_port }};GRAYLOGRFC5424
+
+*.* @{{ monitoring_syslog_host }}:{{ monitoring_syslog_port }};RSYSLOG_SyslogProtocol23Format

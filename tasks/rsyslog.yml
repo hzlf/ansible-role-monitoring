@@ -1,5 +1,8 @@
 ---
 
+- debug:
+    msg: "inventory_hostname: {{ inventory_hostname }} ansible_hostname: {{ ansible_hostname }}"
+
 - name: update apt cache
   apt: update_cache=yes cache_valid_time=3600
 

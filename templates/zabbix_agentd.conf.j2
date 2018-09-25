@@ -18,6 +18,7 @@ StartAgents=0
 ServerActive={{ monitoring_zabbix_host }}
 {% endif %}
 
+HostnameItem=system.run["hostname -f"]
 HostMetadataItem=system.uname
 
 Include=/etc/zabbix/zabbix_agentd.conf.d/
