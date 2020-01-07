@@ -1,15 +1,17 @@
 ---
+
+zabbix_version: 4.4
+
+monitoring_syslog_enabled: false
 monitoring_syslog_host: gojo.hazelfire.com
 monitoring_syslog_port: 10514
-monitoring_syslog_enabled: true
-
 monitoring_hostname_from_inventory: true
 monitoring_hostname_appendix: false
 
 
-monitoring_zabbix_host: service.hazelfire.com
-monitoring_zabbix_passive_source_ip: no
-
+monitoring_zabbix_host: zabbix.hazelfire.com
 monitoring_zabbix_active_enabled: true
 monitoring_zabbix_passive_enabled: true
 
+# psk key: use in hosts encryption settings
+monitoring_zabbix_key_psk: '*****'

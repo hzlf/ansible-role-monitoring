@@ -6,8 +6,6 @@ $LocalHostName {{ inventory_hostname }}{% if monitoring_hostname_appendix %}{{ m
 $PreserveFQDN on
 {% endif %}
 
-
-
 #################
 #### MODULES ####
 #################
@@ -31,7 +29,6 @@ $IncludeConfig /etc/rsyslog.d/*.conf
 ###############
 #### RULES ####
 ###############
-
 auth,authpriv.*			/var/log/auth.log
 *.*;auth,authpriv.none		-/var/log/syslog
 #cron.*				/var/log/cron.log
@@ -65,5 +62,7 @@ daemon.*;mail.*;\
 	*.=notice;*.=warn	|/dev/xconsole
 
 
-
+#############
+#### LOG ####
+#############
 *.* @{{ monitoring_syslog_host }}:{{ monitoring_syslog_port }};RSYSLOG_SyslogProtocol23Format

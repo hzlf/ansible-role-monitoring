@@ -1,24 +1,35 @@
 PidFile=/var/run/zabbix/zabbix_agentd.pid
-LogFile=/var/log/zabbix-agent/zabbix_agentd.log
-LogFileSize=10
+LogType=system
 EnableRemoteCommands=0
 LogRemoteCommands=1
 
 {% if monitoring_zabbix_passive_enabled is defined and monitoring_zabbix_passive_enabled == true %}
 # passive monitoring
-# from zabbix-server perspective: "polling"
-Server={{ monitoring_zabbix_host }}{% if monitoring_zabbix_passive_source_ip %},{{ monitoring_zabbix_passive_source_ip }}{% endif %},::1
+# from zabbix-agent perspective: "polling"
+Server={{ monitoring_zabbix_host }},::1
 {% else %}
 StartAgents=0
 {% endif %}
 
 {% if monitoring_zabbix_active_enabled is defined and monitoring_zabbix_active_enabled == true %}
 # active monitoring
-# from zabbix-server perspective: "pushing"
+# from zabbix-agent perspective: "pushing"
 ServerActive={{ monitoring_zabbix_host }}
 {% endif %}
 
-HostnameItem=system.run["hostname -f"]
-HostMetadataItem=system.uname
+Hostname={{ inventory_hostname }}
+HostMetadata=:osname={{ ansible_distribution }}:osversion={{ ansible_distribution_version }}:kernel={{ ansible_kernel }}:vendor={{ ansible_system_vendor }}:
+# HostMetadataItem=system.uname
 
-Include=/etc/zabbix/zabbix_agentd.conf.d/
+# encryption
+# we allow to connect *agent-to-server* unencrypted (discovery)
+TLSConnect=unencrypted
+# *server-to-agent* must be encrypted
+TLSAccept=unencrypted,psk
+TLSPSKFile=/etc/zabbix/key.psk
+TLSPSKIdentity=key
+
+Include=/etc/zabbix/zabbix_agentd.d/
+
+
+# 2766f689576b9894d771ec21d3aeebcdb8d2583efc891f32f17936dcaecb583b7fd85e72059b88112c5816dfefc23f0a7d66c2f8c24c31826df9976a0c8f6007

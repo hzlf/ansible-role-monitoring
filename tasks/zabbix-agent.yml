@@ -1,64 +1,52 @@
 ---
 
-
-- name: add zabbix repository key (debian 7 & 8)
+- name: add zabbix repository key
   apt_key: url=https://repo.zabbix.com/zabbix-official-repo.key state=present
-  when: ansible_distribution == 'Debian' and (ansible_distribution_version == '7' or ansible_distribution_version == '8')
 
-- name: add zabbix repository (debian 7 & 8)
-  apt_repository: repo='deb http://repo.zabbix.com/zabbix/3.0/debian {{ ansible_distribution_release }} main' state=present
-  when: ansible_distribution == 'Debian' and (ansible_distribution_version == '7' or ansible_distribution_version == '8')
+- name: "remove zabbix repository v3"
+  apt_repository:
+    repo: "{{ item }} http://repo.zabbix.com/zabbix/3.0/debian/ {{ ansible_distribution_release }} main"
+    state: absent
+  with_items:
+    - deb-src
+    - deb
 
-- name: add zabbix src repository (debian 7 & 8)
-  apt_repository: repo='deb-src http://repo.zabbix.com/zabbix/3.0/debian {{ ansible_distribution_release }} main' state=present
-  when: ansible_distribution == 'Debian' and (ansible_distribution_version == '7' or ansible_distribution_version == '8')
+# TODO: how could we remove repositories from older debian versions (after dist upgrade)
+- name: "add zabbix repository {{ zabbix_version }}"
+  apt_repository:
+    repo: "{{ item }} http://repo.zabbix.com/zabbix/{{ zabbix_version }}/{{ ansible_distribution.lower() }}/ {{ ansible_distribution_release }} main"
+    state: present
+  with_items:
+    - deb-src
+    - deb
 
-- name: add zabbix src repository (debian 9)
-  apt_repository: repo='deb-src http://repo.zabbix.com/zabbix/3.0/debian {{ ansible_distribution_release }} main' state=present
-  when: ansible_distribution == 'Debian' and (ansible_distribution_version == '9')
-
-
-
-- name: add zabbix repository key (ubuntu)
-  apt_key: url=https://repo.zabbix.com/zabbix-official-repo.key state=present
-  when: ansible_distribution == 'Ubuntu'
-
-- name: add zabbix repository (ubuntu)
-  apt_repository: repo='deb http://repo.zabbix.com/zabbix/3.0/ubuntu {{ ansible_distribution_release }} main' state=present
-  when: ansible_distribution == 'Ubuntu'
-
-- name: add zabbix src repository (ubuntu)
-  apt_repository: repo='deb-src http://repo.zabbix.com/zabbix/3.0/ubuntu {{ ansible_distribution_release }} main' state=present
-  when: ansible_distribution == 'Ubuntu'
-
-
-
-- name: update apt cache
-  apt: update_cache=yes cache_valid_time=3600
-
-- name: installing zabbix-agent
-  apt: name=zabbix-agent state=latest
-
-- name: make sure zabbix log directory exists
-  file:
-    path: /var/log/zabbix-agent/
-    owner: zabbix
-    group: zabbix
-    mode: 0755
-    state: directory
-
-- name: make sure zabbix conf directory exists
+- name: remove abbix_agentd.conf.d directory (legacy)
   file:
     path: /etc/zabbix/zabbix_agentd.conf.d/
+    state: absent
+
+- name: create abbix_agentd.d directory
+  file:
+    path: /etc/zabbix/zabbix_agentd.d
     state: directory
 
 - name: adding zabbix config
   template: src=zabbix_agentd.conf.j2
-            dest=/etc/zabbix/zabbix_agentd.conf
-            owner=root
-            group=root
-            mode=0644
+    dest=/etc/zabbix/zabbix_agentd.conf
+    owner=root
+    group=root
+    mode=0644
+
+- name: add psk
+  copy: content="{{ monitoring_zabbix_key_psk }}" dest=/etc/zabbix/key.psk
+
+- name: installing zabbix-agent
+  apt: name=zabbix-agent state=latest
 
 - name: restart zabbix-agent
   service: name=zabbix-agent state=restarted
+  changed_when: False
+
+- name: enable agent on boot zabbix-agent
+  service: name=zabbix-agent enabled=yes
   changed_when: False
